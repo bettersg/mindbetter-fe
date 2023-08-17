@@ -83,3 +83,4 @@ export const styles = {
   headerSmall: headerSmall,
   imageContainer: imageContainer,
 };
+
