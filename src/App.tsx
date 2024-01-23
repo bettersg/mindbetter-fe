@@ -10,11 +10,11 @@ import UserDashboardPage from "./features/user-dashboard/user-dashboard-page";
 import { AuthProvider } from "./services/firebase/authProvider";
 import FirestoreMock from "./features/firestore-mock/firestore-mock";
 import { Paths } from "./paths";
-import { appTheme } from "./theme";
+import mendisphereTheme from "./theme/index";
 
 function App() {
   return (
-    <ChakraProvider theme={appTheme}>
+    <ChakraProvider theme={mendisphereTheme}>
       <AuthProvider>
         <Routes>
           <Route path={Paths.home} element={<Home />} />
