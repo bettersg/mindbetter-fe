@@ -2,12 +2,21 @@ import { Button } from "@chakra-ui/button";
 import { Spacer, VStack, Text, Box, HStack } from "@chakra-ui/layout";
 import { useState } from "react";
 import ReactQuill from "react-quill";
+import { Delta as TypeDelta, Sources } from "quill";
+import Delta from "quill-delta";
 import "react-quill/dist/quill.snow.css";
 
 export const QuillEditor: React.FC = () => {
   const [editorValue, setEditorValue] = useState("");
-  const handleEditorChange = (value: string) => {
+
+  const handleEditorChange = (
+    value: string,
+    dt: TypeDelta,
+    source: Sources,
+    editor: ReactQuill.UnprivilegedEditor
+  ) => {
     setEditorValue(value);
+    console.log(editor.getContents());
   };
 
   const modules = {
