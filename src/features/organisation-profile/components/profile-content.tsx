@@ -4,6 +4,7 @@ import { Delta as TypeDelta } from "quill";
 import { CSSProperties } from "react";
 import Delta, { AttributeMap, Op } from "quill-delta";
 import { Box, HStack, Spacer } from "@chakra-ui/react";
+import { textStyles } from "../../../theme/typography";
 
 const htmlContent_simple = `<h1>OTR Listens</h1>
 <p>OTR Listens is a text-based chat support. It is a safe, anonymous chat platform for emotional support, manned by trained volunteers.Avie is available if you need an empathetic listening ear during these operating hours.</p>
@@ -218,11 +219,11 @@ export const ProfileContent: React.FC = () => {
       .join("");
 
     if (attributes.header === 1) {
-      return <Text className="title.xxl">{text}</Text>;
+      return <Text textStyle="title.xxl">{text}</Text>;
     } else if (attributes.header === 2) {
-      return <Text className="title.md">{text}</Text>;
+      return <Text textStyle="title.md">{text}</Text>;
     } else {
-      return <Text className="label.lg">{text}</Text>;
+      return <Text textStyle="label.lg">{text}</Text>;
     }
   };
 

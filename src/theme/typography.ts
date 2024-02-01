@@ -15,7 +15,7 @@ const title = {
   sm: "1rem",
 };
 
-export const typography = {
+export const textStyles = {
   bg: {
     lg: {
       fontSize: "10rem",
