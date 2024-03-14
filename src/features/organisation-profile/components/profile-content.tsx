@@ -1,10 +1,6 @@
 import { Text } from "@chakra-ui/layout";
-import { css } from "@emotion/react";
-import { Delta as TypeDelta } from "quill";
-import { CSSProperties } from "react";
 import Delta, { AttributeMap, Op } from "quill-delta";
-import { Box, HStack, Spacer } from "@chakra-ui/react";
-import { textStyles } from "../../../theme/typography";
+import { Box, Divider, HStack, Spacer } from "@chakra-ui/react";
 
 const htmlContent_simple = `<h1>OTR Listens</h1>
 <p>OTR Listens is a text-based chat support. It is a safe, anonymous chat platform for emotional support, manned by trained volunteers.Avie is available if you need an empathetic listening ear during these operating hours.</p>
@@ -54,7 +50,7 @@ const delta_content = `
             "insert": "\\n"
         },
         {
-            "insert": "OTR Listens is a text-based chat support. It is a safe, anonymous chat platform for emotional support, manned by trained volunteers.Avie is available if you need an empathetic listening ear during these operating hours:\\nMonday - Friday (Weekdays): 4pm - 12 midnight (SGT)"
+            "insert": "OTR Listens is a text-based chat support. It is a safe, anonymous chat platform for emotional support, manned by trained volunteers. Avie is available if you need an empathetic listening ear during these operating hours:\\nMonday - Friday (Weekdays): 4pm - 12 midnight (SGT)"
         },
         {
             "attributes": {
@@ -167,48 +163,7 @@ const delta_content = `
     ]
   `;
 
-const contentStyle = css`
-  h1 {
-    font-size: 24px;
-    font-weight: 700;
-    color: #707070;
-  }
-  h2 {
-    font-size: 18px;
-    font-weight: 700;
-    color: #707070;
-  }
-  p {
-    font-size: 16px;
-    font-weight: 400;
-  }
-`;
-
-const mainHeader: CSSProperties = {
-  color: "#333333",
-  fontSize: "24px",
-  fontWeight: "700",
-};
-
-const subHeader: CSSProperties = {
-  color: "#707070",
-  fontSize: "18px",
-  fontWeight: "700",
-};
-
-const paragraph: CSSProperties = {
-  color: "#000000",
-  fontSize: "16px",
-  fontWeight: "400",
-};
-
 export const ProfileContent: React.FC = () => {
-  // const sampleDelta = new Delta([
-  //   { insert: "Gandalf", attributes: { bold: true } },
-  //   { insert: " the " },
-  //   { insert: "Grey", attributes: { color: "#ccc" } },
-  // ]);
-
   const sample2: Op[] = JSON.parse(delta_content);
   const sampleDelta: Delta = new Delta(sample2);
 
@@ -219,7 +174,21 @@ export const ProfileContent: React.FC = () => {
       .join("");
 
     if (attributes.header === 1) {
-      return <Text textStyle="title.xxl">{text}</Text>;
+      return (
+        <>
+          {index !== 0 && (
+            <Divider
+              mb={16}
+              mt={16}
+              borderWidth={1}
+              borderColor="netural.secondary"
+            />
+          )}
+          <Text textStyle="title.lg-bold" mb={4}>
+            {text}
+          </Text>
+        </>
+      );
     } else if (attributes.header === 2) {
       return <Text textStyle="title.md">{text}</Text>;
     } else {
@@ -229,6 +198,11 @@ export const ProfileContent: React.FC = () => {
 
   const renderDelta = (delta: Delta) => {
     const renderedContent: React.ReactNode[] = [];
+
+    // parse into sections based on header 1
+    // then parse into sub sections based on header 2
+    // then parse into lines?
+
     delta.eachLine((line: Delta, attributes: AttributeMap, i: number) => {
       renderedContent.push(renderText(line, attributes, i));
     });
@@ -237,12 +211,12 @@ export const ProfileContent: React.FC = () => {
   };
 
   return (
-    <HStack>
-      <Box textAlign="left" width="20vw" border="2px"></Box>
-      <Spacer />
-      <Box width="40vw" textAlign="left">
-        {renderDelta(sampleDelta)}
+    <HStack spacing={8} align="start">
+      <Box textAlign="left" width="10vw" border="2px">
+        <Text>Test</Text>
       </Box>
+      <Spacer />
+      <Box textAlign="left">{renderDelta(sampleDelta)}</Box>
     </HStack>
   );
 };
