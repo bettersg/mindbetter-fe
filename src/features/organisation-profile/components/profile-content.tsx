@@ -1,6 +1,15 @@
 import { Text } from "@chakra-ui/layout";
 import Delta, { AttributeMap, Op } from "quill-delta";
-import { Box, Divider, HStack, Spacer } from "@chakra-ui/react";
+import {
+  Box,
+  Divider,
+  HStack,
+  Link,
+  ListItem,
+  Spacer,
+  UnorderedList,
+  VStack,
+} from "@chakra-ui/react";
 
 const htmlContent_simple = `<h1>OTR Listens</h1>
 <p>OTR Listens is a text-based chat support. It is a safe, anonymous chat platform for emotional support, manned by trained volunteers.Avie is available if you need an empathetic listening ear during these operating hours.</p>
@@ -50,7 +59,16 @@ const delta_content = `
             "insert": "\\n"
         },
         {
-            "insert": "OTR Listens is a text-based chat support. It is a safe, anonymous chat platform for emotional support, manned by trained volunteers. Avie is available if you need an empathetic listening ear during these operating hours:\\nMonday - Friday (Weekdays): 4pm - 12 midnight (SGT)"
+            "insert": "OTR Listens is a text-based chat support. It is a safe, anonymous chat platform for emotional support, manned by trained volunteers. Avie is available if you need an empathetic listening ear during these operating hours:\\n"
+        },
+        {
+            "attributes": {
+                "bold": true
+            },
+            "insert": "Monday "
+        },
+        {
+            "insert": "- Friday (Weekdays): 4pm - 12 midnight (SGT)"
         },
         {
             "attributes": {
@@ -59,12 +77,22 @@ const delta_content = `
             "insert": "\\n"
         },
         {
-            "insert": "Saturday & Sunday (Weekends): 12 noon - 12 midnight daily (SGT)"
+            "attributes": {
+                "italic": true,
+                "bold": true
+            },
+            "insert": "Saturday & Sunday "
+        },
+        {
+            "insert": "(Weekends): 12 noon - 12 midnight daily (SGT)"
         },
         {
             "attributes": {
                 "list": "bullet"
             },
+            "insert": "\\n"
+        },
+        {
             "insert": "\\n"
         },
         {
@@ -163,19 +191,34 @@ const delta_content = `
     ]
   `;
 
+  function hasKeySetToTrue(attributeMap: AttributeMap, key: string): boolean {
+    return (key in attributeMap && attributeMap[key] === true);
+}
+
+function hasKeySetToValue(attributeMap: AttributeMap, key: string): boolean {
+    return (key in attributeMap && typeof attributeMap[key] === "string");
+}
+
 export const ProfileContent: React.FC = () => {
   const sample2: Op[] = JSON.parse(delta_content);
   const sampleDelta: Delta = new Delta(sample2);
 
-  const renderText = (line: Delta, attributes: AttributeMap, index: number) => {
-    const text = line
-      .filter((op) => typeof op.insert === "string")
-      .map((op) => op.insert)
-      .join("");
+  const bulletListItems: JSX.Element[] = [];
 
-    if (attributes.header === 1) {
-      return (
+  const renderText = (line: Delta, attributes: AttributeMap, index: number) => {
+    let jsxRender: JSX.Element | undefined;
+    let isBulletList: boolean = false;
+
+    const renderedLine = parseFormattedLine(line);
+
+    if (attributes && attributes.list === "bullet") {
+      // Handle bullet list items
+      bulletListItems.push(renderedLine);
+      isBulletList = true;
+    } else if (attributes.header === 1) {
+      jsxRender = (
         <>
+          {bulletListItems.length != 0 && renderBulletItems(bulletListItems)}
           {index !== 0 && (
             <Divider
               mb={16}
@@ -185,15 +228,93 @@ export const ProfileContent: React.FC = () => {
             />
           )}
           <Text textStyle="title.lg-bold" mb={4}>
-            {text}
+            {renderedLine}
           </Text>
         </>
       );
     } else if (attributes.header === 2) {
-      return <Text textStyle="title.md">{text}</Text>;
+      jsxRender = (
+        <>
+          {bulletListItems.length != 0 && renderBulletItems(bulletListItems)}
+          <Text textStyle="title.md">{renderedLine}</Text>
+        </>
+      );
     } else {
-      return <Text textStyle="label.lg">{text}</Text>;
+      jsxRender = (
+        <>
+          {bulletListItems.length != 0 && renderBulletItems(bulletListItems)}
+          <Text mt={4} mb={4} textStyle="label.lg">
+            {renderedLine}
+          </Text>
+        </>
+      );
     }
+
+    if (!isBulletList) {
+      bulletListItems.length = 0;
+    }
+
+    return jsxRender;
+  };
+
+  const renderBulletItems = (bulletListItems: JSX.Element[]) => {
+    return (
+      <UnorderedList ml={8} spacing={2}>
+        {bulletListItems.map((item, idx) => (
+          <ListItem key={idx}>{item}</ListItem>
+        ))}
+      </UnorderedList>
+    );
+  };
+
+  const parseFormattedLine = (line: Delta): JSX.Element => {
+    let elements: JSX.Element[] = line.ops.map((textDelta: Op, idx: number) => {
+        let text: string | undefined = undefined;
+        
+        if (typeof textDelta.insert === "string") {
+            text = textDelta
+                    .insert
+                    .replace("\\n", "\\n\\n")
+                    .trim();
+        }
+        
+        if (textDelta.attributes === undefined) {
+            return (
+                <Text>
+                    {text}
+                </Text>
+            );
+        } 
+
+        console.log(textDelta.attributes);
+
+        const isBold = hasKeySetToTrue(textDelta.attributes, "bold")
+        const isItalic = hasKeySetToTrue(textDelta.attributes, "italic")
+        const isLink = hasKeySetToValue(textDelta.attributes, "link")
+
+        if (isLink) {
+            const linkUrl :string = textDelta.attributes["link"]?.toString() ?? "";
+            console.log(linkUrl);
+            return (<Link href={linkUrl} isExternal> 
+                {text} 
+            </Link>)
+        }
+
+        return (
+            <Text fontWeight={isBold ? "bold" : "normal"} fontStyle={isItalic ? "italic" : "normal"}>
+                {text}
+            </Text>
+        );
+        
+    });
+
+    return (
+        <HStack>
+            {elements.map((item) => {
+                return item
+            })}
+        </HStack>
+    );
   };
 
   const renderDelta = (delta: Delta) => {
