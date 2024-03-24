@@ -10,6 +10,7 @@ import {
   Spacer,
   UnorderedList,
 } from "@chakra-ui/react";
+import { HeaderItem, ProfileContentTOC } from "./profile-content-toc";
 
 function hasKeySetToTrue(attributeMap: AttributeMap, key: string): boolean {
   return key in attributeMap && attributeMap[key] === true;
@@ -19,13 +20,20 @@ function hasKeySetToValue(attributeMap: AttributeMap, key: string): boolean {
   return key in attributeMap && typeof attributeMap[key] === "string";
 }
 
+function getRawTextLine(line: Delta): string {
+  return line
+    .filter((op) => typeof op.insert === "string")
+    .map((op) => op.insert)
+    .join("");
+}
+
 export const ProfileContent: React.FC = () => {
   const sample2: Op[] = deltafile;
   const sampleDelta: Delta = new Delta(sample2);
 
-  console.log(sampleDelta);
-
   const bulletListItems: JSX.Element[] = [];
+
+  const tOCItems: HeaderItem[] = [];
 
   const renderText = (line: Delta, attributes: AttributeMap, index: number) => {
     let jsxRender: JSX.Element | undefined;
@@ -38,6 +46,11 @@ export const ProfileContent: React.FC = () => {
       bulletListItems.push(renderedLine);
       isBulletList = true;
     } else if (attributes.header === 1) {
+      tOCItems.push({
+        header: getRawTextLine(line),
+        subHeaders: [],
+      });
+
       jsxRender = (
         <>
           {bulletListItems.length != 0 && renderBulletItems(bulletListItems)}
@@ -55,6 +68,11 @@ export const ProfileContent: React.FC = () => {
         </>
       );
     } else if (attributes.header === 2) {
+      const mainHeader = tOCItems.at(-1);
+      if (mainHeader !== undefined) {
+        mainHeader.subHeaders?.push(getRawTextLine(line));
+      }
+
       jsxRender = (
         <>
           {bulletListItems.length != 0 && renderBulletItems(bulletListItems)}
@@ -101,15 +119,12 @@ export const ProfileContent: React.FC = () => {
         return <Text>{text}</Text>;
       }
 
-      console.log(textDelta.attributes);
-
       const isBold = hasKeySetToTrue(textDelta.attributes, "bold");
       const isItalic = hasKeySetToTrue(textDelta.attributes, "italic");
       const isLink = hasKeySetToValue(textDelta.attributes, "link");
 
       if (isLink) {
         const linkUrl: string = textDelta.attributes["link"]?.toString() ?? "";
-        console.log(linkUrl);
         return (
           <Link href={linkUrl} isExternal>
             {text}
@@ -153,7 +168,7 @@ export const ProfileContent: React.FC = () => {
   return (
     <HStack spacing={8} align="start">
       <Box textAlign="left" width="10vw" border="2px">
-        <Text>Test</Text>
+        <ProfileContentTOC tOCItems={tOCItems} />
       </Box>
       <Spacer />
       <Box textAlign="left">{renderDelta(sampleDelta)}</Box>
