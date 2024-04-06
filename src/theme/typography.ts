@@ -98,6 +98,10 @@ export const textStyles = {
       fontSize: "1rem",
       fontWeight: normalFontWeight,
     },
+    "md-bold": {
+      fontSize: "1rem",
+      fontWeight: boldFontWeight,
+    },
     sm: {
       fontSize: "0.85rem",
       fontWeight: normalFontWeight,

@@ -166,12 +166,22 @@ export const ProfileContent: React.FC = () => {
   };
 
   return (
-    <HStack spacing={8} align="start">
-      <Box textAlign="left" width="10vw" border="2px">
+    <HStack mt={8} spacing="4%" align="start">
+      <Box
+        width="25%"
+        textAlign="left"
+        style={{
+          position: "sticky",
+          top: 200,
+          zIndex: 1,
+        }}
+      >
         <ProfileContentTOC tOCItems={tOCItems} />
       </Box>
       <Spacer />
-      <Box textAlign="left">{renderDelta(sampleDelta)}</Box>
+      <Box width="70%" textAlign="left">
+        {renderDelta(sampleDelta)}
+      </Box>
     </HStack>
   );
 };

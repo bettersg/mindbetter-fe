@@ -5,6 +5,7 @@ import {
   AccordionPanel,
   AccordionIcon,
   Box,
+  Text,
 } from "@chakra-ui/react";
 import React from "react";
 
@@ -17,28 +18,42 @@ export const ProfileContentTOC: React.FC<{
   tOCItems: HeaderItem[];
 }> = ({ tOCItems }) => {
   return (
-    <Accordion>
-      {tOCItems.map((item: HeaderItem, index: number) => (
-        <AccordionItem key={index}>
-          <h2>
+    <Accordion allowToggle variant="tocStyle">
+      {tOCItems.map((item: HeaderItem, index: number) => {
+        const hasNoSubSections = item.subHeaders?.length === 0;
+
+        if (hasNoSubSections) {
+          return (
+            <AccordionItem key={index}>
+              <AccordionButton>
+                <Text textAlign="left" textStyle="body.md-bold">
+                  {item.header}
+                </Text>
+              </AccordionButton>
+            </AccordionItem>
+          );
+        }
+
+        return (
+          <AccordionItem key={index}>
             <AccordionButton>
-              <Box flex="1" textAlign="left">
+              <Text textAlign="left" textStyle="body.md-bold">
                 {item.header}
-              </Box>
+              </Text>
               <AccordionIcon />
             </AccordionButton>
-          </h2>
-          <AccordionPanel pb={4}>
-            {item.subHeaders && (
-              <ul>
-                {item.subHeaders.map((subHeader, subIndex) => (
-                  <li key={subIndex}>{subHeader}</li>
-                ))}
-              </ul>
-            )}
-          </AccordionPanel>
-        </AccordionItem>
-      ))}
+            <AccordionPanel>
+              {item.subHeaders && (
+                <ul>
+                  {item.subHeaders.map((subHeader, subIndex) => (
+                    <li key={subIndex}>{subHeader}</li>
+                  ))}
+                </ul>
+              )}
+            </AccordionPanel>
+          </AccordionItem>
+        );
+      })}
     </Accordion>
   );
 };
