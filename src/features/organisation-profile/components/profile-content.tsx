@@ -48,6 +48,7 @@ export const ProfileContent: React.FC = () => {
     } else if (attributes.header === 1) {
       tOCItems.push({
         header: getRawTextLine(line),
+        id: index.toString(),
         subHeaders: [],
       });
 
@@ -62,7 +63,7 @@ export const ProfileContent: React.FC = () => {
               borderColor="netural.secondary"
             />
           )}
-          <Text textStyle="title.lg-bold" mb={4}>
+          <Text id={index.toString()} textStyle="title.lg-bold" mb={4}>
             {renderedLine}
           </Text>
         </>
@@ -70,13 +71,18 @@ export const ProfileContent: React.FC = () => {
     } else if (attributes.header === 2) {
       const mainHeader = tOCItems.at(-1);
       if (mainHeader !== undefined) {
-        mainHeader.subHeaders?.push(getRawTextLine(line));
+        mainHeader.subHeaders?.push({
+          header: getRawTextLine(line),
+          id: index.toString(),
+        });
       }
 
       jsxRender = (
         <>
           {bulletListItems.length != 0 && renderBulletItems(bulletListItems)}
-          <Text textStyle="title.md">{renderedLine}</Text>
+          <Text id={index.toString()} textStyle="title.md">
+            {renderedLine}
+          </Text>
         </>
       );
     } else {

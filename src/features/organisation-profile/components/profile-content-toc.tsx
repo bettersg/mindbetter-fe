@@ -10,9 +10,24 @@ import {
 import React from "react";
 
 export interface HeaderItem {
+  id: string;
   header: string;
-  subHeaders?: string[];
+  subHeaders?: HeaderItem[];
 }
+
+const scrollToTitle = (id: string) => {
+  const element = document.getElementById(id);
+  if (element) {
+    const elementRect = element.getBoundingClientRect();
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    const targetY =
+      elementRect.top +
+      scrollTop -
+      window.innerHeight / 4 +
+      elementRect.height / 4;
+    window.scrollTo({ top: targetY, behavior: "smooth" });
+  }
+};
 
 export const ProfileContentTOC: React.FC<{
   tOCItems: HeaderItem[];
@@ -25,7 +40,7 @@ export const ProfileContentTOC: React.FC<{
         if (hasNoSubSections) {
           return (
             <AccordionItem key={index}>
-              <AccordionButton>
+              <AccordionButton onClick={() => scrollToTitle(item.id)}>
                 <Text textAlign="left" textStyle="body.md-bold">
                   {item.header}
                 </Text>
@@ -36,7 +51,7 @@ export const ProfileContentTOC: React.FC<{
 
         return (
           <AccordionItem key={index}>
-            <AccordionButton>
+            <AccordionButton onClick={() => scrollToTitle(item.id)}>
               <Text textAlign="left" textStyle="body.md-bold">
                 {item.header}
               </Text>
@@ -46,7 +61,9 @@ export const ProfileContentTOC: React.FC<{
               {item.subHeaders && (
                 <ul>
                   {item.subHeaders.map((subHeader, subIndex) => (
-                    <li key={subIndex}>{subHeader}</li>
+                    <li onClick={() => scrollToTitle(item.id)} key={subIndex}>
+                      {subHeader.header}
+                    </li>
                   ))}
                 </ul>
               )}
