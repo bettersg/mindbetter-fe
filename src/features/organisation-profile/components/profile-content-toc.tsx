@@ -7,7 +7,7 @@ import {
   Box,
   Text,
 } from "@chakra-ui/react";
-import React from "react";
+import React, { useState } from "react";
 
 export interface HeaderItem {
   id: string;
@@ -32,42 +32,38 @@ const scrollToTitle = (id: string) => {
 export const ProfileContentTOC: React.FC<{
   tOCItems: HeaderItem[];
 }> = ({ tOCItems }) => {
+  // Track the currently selected item
+  const [selectedItem, setSelectedItem] = useState(tOCItems[0].id);
+
+  const handleItemClick = (item: HeaderItem) => {
+    setSelectedItem(item.id);
+    scrollToTitle(item.id);
+  };
+
   return (
     <Accordion allowToggle variant="tocStyle">
       {tOCItems.map((item: HeaderItem, index: number) => {
-        const hasNoSubSections = item.subHeaders?.length === 0;
-
-        if (hasNoSubSections) {
-          return (
-            <AccordionItem key={index}>
-              <AccordionButton onClick={() => scrollToTitle(item.id)}>
-                <Text textAlign="left" textStyle="body.md-bold">
-                  {item.header}
-                </Text>
-              </AccordionButton>
-            </AccordionItem>
-          );
-        }
+        const hasSubSections = item.subHeaders && item.subHeaders.length > 0;
 
         return (
           <AccordionItem key={index}>
-            <AccordionButton onClick={() => scrollToTitle(item.id)}>
+            <AccordionButton onClick={() => handleItemClick(item)}>
               <Text textAlign="left" textStyle="body.md-bold">
                 {item.header}
               </Text>
-              <AccordionIcon />
+              {hasSubSections && <AccordionIcon />}
             </AccordionButton>
-            <AccordionPanel>
-              {item.subHeaders && (
+            {hasSubSections && (
+              <AccordionPanel>
                 <ul>
-                  {item.subHeaders.map((subHeader, subIndex) => (
-                    <li onClick={() => scrollToTitle(item.id)} key={subIndex}>
+                  {item.subHeaders?.map((subHeader, subIndex) => (
+                    <li onClick={() => handleItemClick(item)} key={subIndex}>
                       {subHeader.header}
                     </li>
                   ))}
                 </ul>
-              )}
-            </AccordionPanel>
+              </AccordionPanel>
+            )}
           </AccordionItem>
         );
       })}

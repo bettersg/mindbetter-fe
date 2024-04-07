@@ -1,5 +1,6 @@
 import { accordionAnatomy } from "@chakra-ui/anatomy";
 import { createMultiStyleConfigHelpers, defineStyle } from "@chakra-ui/react";
+import { colors } from "../colours";
 
 const { definePartsStyle, defineMultiStyleConfig } =
   createMultiStyleConfigHelpers(accordionAnatomy.keys);
@@ -15,7 +16,9 @@ const tocStyle = definePartsStyle({
     },
   },
   button: {
-    _selected: "blue.500",
+    _expanded: {
+      color: colors.brand.primary,
+    },
   },
   icon: {
     fontSize: "32px",
