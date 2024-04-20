@@ -15,11 +15,11 @@ const tocStyle = definePartsStyle({
       borderBottomWidth: "0", // Remove bottom border for last item
     },
   },
-  button: {
-    _expanded: {
-      color: colors.brand.primary,
-    },
-  },
+  // button: {
+  //   _expanded: {
+  //     color: colors.brand.primary,
+  //   },
+  // },
   icon: {
     fontSize: "32px",
     marginLeft: "auto", // Right-align the icon

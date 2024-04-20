@@ -11,6 +11,9 @@ import {
   UnorderedList,
 } from "@chakra-ui/react";
 import { HeaderItem, ProfileContentTOC } from "./profile-content-toc";
+import { useEffect, useRef, useState } from "react";
+import { InView, useInView } from "react-intersection-observer";
+import "../scss/profile.scss";
 
 function hasKeySetToTrue(attributeMap: AttributeMap, key: string): boolean {
   return key in attributeMap && attributeMap[key] === true;
@@ -28,13 +31,26 @@ function getRawTextLine(line: Delta): string {
 }
 
 export const ProfileContent: React.FC = () => {
+  // temporary usage, should be retrieved from firebase
   const sample2: Op[] = deltafile;
   const sampleDelta: Delta = new Delta(sample2);
 
+  // handle updates to section in view when scrolling
+  const [targetId, setTargetId] = useState(0);
+  const tryUpdateHeaderInView = (inView: boolean, id: number) => {
+    if (inView) {
+      console.log("Detected new section in view, id:", id);
+      setTargetId(id);
+    }
+  };
+
+  // container for holding bullet list items
   const bulletListItems: JSX.Element[] = [];
 
+  // container for building the side bar contents view
   const tOCItems: HeaderItem[] = [];
 
+  // generate the content dynamically, line by line using delta format.
   const renderText = (line: Delta, attributes: AttributeMap, index: number) => {
     let jsxRender: JSX.Element | undefined;
     let isBulletList: boolean = false;
@@ -54,7 +70,7 @@ export const ProfileContent: React.FC = () => {
 
       jsxRender = (
         <>
-          {bulletListItems.length != 0 && renderBulletItems(bulletListItems)}
+          {bulletListItems.length !== 0 && renderBulletItems(bulletListItems)}
           {index !== 0 && (
             <Divider
               mb={16}
@@ -63,9 +79,15 @@ export const ProfileContent: React.FC = () => {
               borderColor="netural.secondary"
             />
           )}
-          <Text id={index.toString()} textStyle="title.lg-bold" mb={4}>
-            {renderedLine}
-          </Text>
+          {/* <div className="horizontal-line"></div> */}
+          <InView
+            rootMargin="-40% 0% -60% 0%"
+            onChange={(inView) => tryUpdateHeaderInView(inView, index)}
+          >
+            <Text id={index.toString()} textStyle="title.lg-bold" mb={4}>
+              {renderedLine}
+            </Text>
+          </InView>
         </>
       );
     } else if (attributes.header === 2) {
@@ -114,39 +136,42 @@ export const ProfileContent: React.FC = () => {
   };
 
   const parseFormattedLine = (line: Delta): JSX.Element => {
-    let elements: JSX.Element[] = line.ops.map((textDelta: Op, idx: number) => {
-      let text: string | undefined = undefined;
+    let elements: JSX.Element[] = line.ops.map(
+      (textDelta: Op, _idx: number) => {
+        let text: string | undefined = undefined;
 
-      if (typeof textDelta.insert === "string") {
-        text = textDelta.insert.replace("\\n", "\\n\\n").trim();
-      }
+        if (typeof textDelta.insert === "string") {
+          text = textDelta.insert.replace("\\n", "\\n\\n").trim();
+        }
 
-      if (textDelta.attributes === undefined) {
-        return <Text>{text}</Text>;
-      }
+        if (textDelta.attributes === undefined) {
+          return <Text>{text}</Text>;
+        }
 
-      const isBold = hasKeySetToTrue(textDelta.attributes, "bold");
-      const isItalic = hasKeySetToTrue(textDelta.attributes, "italic");
-      const isLink = hasKeySetToValue(textDelta.attributes, "link");
+        const isBold = hasKeySetToTrue(textDelta.attributes, "bold");
+        const isItalic = hasKeySetToTrue(textDelta.attributes, "italic");
+        const isLink = hasKeySetToValue(textDelta.attributes, "link");
 
-      if (isLink) {
-        const linkUrl: string = textDelta.attributes["link"]?.toString() ?? "";
+        if (isLink) {
+          const linkUrl: string =
+            textDelta.attributes["link"]?.toString() ?? "";
+          return (
+            <Link href={linkUrl} isExternal>
+              {text}
+            </Link>
+          );
+        }
+
         return (
-          <Link href={linkUrl} isExternal>
+          <Text
+            fontWeight={isBold ? "bold" : "normal"}
+            fontStyle={isItalic ? "italic" : "normal"}
+          >
             {text}
-          </Link>
+          </Text>
         );
       }
-
-      return (
-        <Text
-          fontWeight={isBold ? "bold" : "normal"}
-          fontStyle={isItalic ? "italic" : "normal"}
-        >
-          {text}
-        </Text>
-      );
-    });
+    );
 
     return (
       <HStack>
@@ -182,7 +207,11 @@ export const ProfileContent: React.FC = () => {
           zIndex: 1,
         }}
       >
-        <ProfileContentTOC tOCItems={tOCItems} />
+        <ProfileContentTOC
+          tOCItems={tOCItems}
+          headerInView={targetId}
+          updateHeaderInView={(id: number) => setTargetId(id)}
+        />
       </Box>
       <Spacer />
       <Box width="70%" textAlign="left">

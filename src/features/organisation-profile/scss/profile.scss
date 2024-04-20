@@ -11,3 +11,11 @@
   align-items: center;
   letter-spacing: -0.015em;
 }
+
+.horizontal-line {
+  position: fixed;
+  top: 40%;
+  left: 0;
+  right: 0;
+  border-top: 1px solid black; /* Change color and thickness as needed */
+}
